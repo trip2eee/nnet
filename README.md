@@ -24,29 +24,23 @@ NUM_CLASSES = 10
 class MNISTDataset(Dataset):    
     def __init__(self, path):
         super(MNISTDataset, self).__init__()
-
-        images = np.fromfile(os.path.join(path, 'train-images.idx3-ubyte'), dtype=np.uint8)
-        labels = np.fromfile(os.path.join(path, 'train-labels.idx1-ubyte'), dtype=np.uint8)
-
-        magic_number = self.byte2int(labels[0:4])
-        assert(magic_number == 2049)
-        num_samples = self.byte2int(labels[4:8])
-        assert(num_samples == 60000)
-
+        images = np.fromfile(os.path.join(path, 'train-images.idx3-ubyte'), dtype=np.uint8)        
         magic_number = self.byte2int(images[0:4])
         assert(magic_number == 2051)
         num_samples = self.byte2int(images[4:8])
         assert(num_samples == 60000)
 
+        labels = np.fromfile(os.path.join(path, 'train-labels.idx1-ubyte'), dtype=np.uint8)
+        magic_number = self.byte2int(labels[0:4])
+        assert(magic_number == 2049)
+        num_samples = self.byte2int(labels[4:8])
+        assert(num_samples == 60000)
+
         rows = self.byte2int(images[8:12])
         cols = self.byte2int(images[12:16])
 
-        self.y = labels[8:]
-        self.x = images[16:]
-
-        self.x = np.reshape(self.x, (num_samples, rows, cols, 1)).astype(np.float32) / 255.0
-        # one hot encoding
-        self.y = nnet.nn.math.onehot(self.y, NUM_CLASSES)
+        self.x = np.reshape(images[16:], (num_samples, rows, cols, 1)).astype(np.float32) / 255.0        
+        self.y = nnet.nn.math.onehot(labels[8:], NUM_CLASSES)   # one hot encoding
     
     def byte2int(self, bytes):
         val = 0
@@ -57,23 +51,19 @@ class MNISTDataset(Dataset):
     def __len__(self):
         return len(self.x)
 
-    def __getitem__(self, idx):
-        
+    def __getitem__(self, idx):        
         x = self.x[idx]
         y = self.y[idx]
-
         return x, y
 ```
 
 ### Training
-Training is performed only for 10 epochs because this library supports only CPU computations. It takes several minutes.
+Training is performed only for 10 epochs because this library supports only CPU computations. The training takes several minutes.
 
 train_mnist.py
 ```python
 import nnet
-from nnet.loss.celoss import CELoss
 import nnet.nn as nn
-import nnet.loss
 import numpy as np
 from mnist_dataset import MNISTDataset
 
@@ -101,28 +91,23 @@ def accuracy(output, target):
     return np.mean(correct)
     
 if __name__ == "__main__":
-
     train_set = MNISTDataset('mnist')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
     
     model = ModelMNIST()
-    celoss = CELoss()
-
+    celoss = nnet.loss.CELoss()
     optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
 
     for epoch in range(10):
         losses = []
         accs = []
-
         for idx_batch, (x, y) in enumerate(train_data):
             output = model(x)
             loss = celoss(output, y)
-
             optim.step(celoss.backward(1.0))
+            losses.append(loss)
 
             acc = accuracy(output, y)
-
-            losses.append(loss)
             accs.append(acc)
             
         print('Epoch {}: loss={:5.4f}, accuracy={:5.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))

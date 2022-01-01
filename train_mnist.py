@@ -1,7 +1,5 @@
 import nnet
-from nnet.loss.celoss import CELoss
 import nnet.nn as nn
-import nnet.loss
 import numpy as np
 from mnist_dataset import MNISTDataset
 
@@ -29,28 +27,23 @@ def accuracy(output, target):
     return np.mean(correct)
     
 if __name__ == "__main__":
-
     train_set = MNISTDataset('mnist')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
     
     model = ModelMNIST()
-    celoss = CELoss()
-
+    celoss = nnet.loss.CELoss()
     optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
 
     for epoch in range(10):
         losses = []
         accs = []
-
         for idx_batch, (x, y) in enumerate(train_data):
             output = model(x)
             loss = celoss(output, y)
-
             optim.step(celoss.backward(1.0))
+            losses.append(loss)
 
             acc = accuracy(output, y)
-
-            losses.append(loss)
             accs.append(acc)
             
         print('Epoch {}: loss={:5.4f}, accuracy={:5.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
