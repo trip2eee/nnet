@@ -1,6 +1,6 @@
 from nnet.module import Module
 from nnet.optim.optimizer import Optimizer
-import nnet.math as math
+import nnet.nn.math as math
 
 class ReLU(Module):
     def __init__(self):

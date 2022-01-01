@@ -5,7 +5,6 @@ Reference: https://pytorch.org/docs/stable/generated/torch.optim.Adam.html
 from typing import get_type_hints
 import numpy as np
 from nnet.optim.optimizer import Optimizer
-import nnet.math as math
 
 class Adam(Optimizer):
     def __init__(self, parameters, lr, betas=(0.9, 0.999), eps=1e-8) -> None:

@@ -10,18 +10,10 @@ def relu_derv(x):
     return np.sign(x)
     
 def sigmoid(x):
-    # s(x) = 1 / (1 + exp(-x))
-
     return np.exp(-np.maximum(-x, 0)) / (1.0 + np.exp(-np.abs(x)))
 
 def sigmoid_derv(x):
-    # derivative of sigmoid.
-    # s(x) = 1 / (1 + exp(-x))
-    # ds/dx = -(1+exp(-x))' / (1+exp(-x))^2
-    # = exp(-x) / (1+exp(-x))^2
-    # = ((1+exp(-x)) - 1) / (1 + exp(-x))^2
-    # = 1/(1+exp(-x)) * (1 - 1/exp(-x))
-    # = s(x)  * (1 - s(x))
+    # derivative of sigmoid.  
     return x * (1 - x)
     
 def tanh(x):

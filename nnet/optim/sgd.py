@@ -4,7 +4,6 @@ Reference: https://pytorch.org/docs/stable/generated/torch.optim.SGD.html#torch.
 
 import numpy as np
 from nnet.optim.optimizer import Optimizer
-import nnet.math as math
 
 class SGD(Optimizer):
     def __init__(self, parameters, lr, momentum=0, dampening=0) -> None:
@@ -19,7 +18,7 @@ class SGD(Optimizer):
         key_t = 't_' + key
         key_b = 'b_' + key
         mu = self.momentum
-        gamma = self.dampening
+        tau = self.dampening
         
         if mu > 0:
             if key_t not in pm:
@@ -29,7 +28,7 @@ class SGD(Optimizer):
             t = pm[key_t]
 
             if t > 0:
-                bt = mu*pm[key_b] + (1-gamma)*gt
+                bt = mu*pm[key_b] + (1-tau)*gt
             else:
                 bt = gt
 
