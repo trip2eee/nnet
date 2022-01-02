@@ -7,17 +7,15 @@ import numpy as np
 from nnet.optim.optimizer import Optimizer
 
 class Adam(Optimizer):
-    def __init__(self, parameters, lr, betas=(0.9, 0.999), eps=1e-8) -> None:
-        super(Adam, self).__init__()
-
-        self.parameters = parameters
-        self.learning_rate = lr
+    def __init__(self, parameters, lr, betas=(0.9, 0.999), eps=1e-8, weight_decay_l1=0.0, weight_decay_l2=0.0):
+        super(Adam, self).__init__(parameters, lr, weight_decay_l1=weight_decay_l1, weight_decay_l2=weight_decay_l2)
         self.betas = betas
         self.eps = eps
 
     def update_param(self, pm, key, gt):
         gt = self.eval_adam_delta(pm, key, gt)
 
+        gt = self.regularize(pm, key, gt)
         pm[key] -= self.learning_rate * gt
     
     def eval_adam_delta(self, pm, key, gt):

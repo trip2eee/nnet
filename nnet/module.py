@@ -7,6 +7,7 @@ class Module:
     def __init__(self) -> None:
         self.is_training = True
         self.modules = []
+        self.pm = {}
 
     def parameters(self):
         return self.modules        

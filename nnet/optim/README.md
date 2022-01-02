@@ -54,4 +54,17 @@ $ \gamma $: learning rate
 
 ---
 
+## Regularization
+### L1 Regularization
+The mean of absolute values of weights are added to the loss.
 
+$$ L = L_0 + \frac{ \lambda_1 } {n} \sum \left| w \right| $$
+
+$$ \frac{\partial L}{\partial w} = \frac{\lambda_1}{n}\sum sign\left(w\right) $$
+$$ g_t \leftarrow g_t + \frac{\lambda_1}{n}\sum sign\left(w\right) $$
+
+### L2 Regularization
+$$ L = L_0 + \frac{ \lambda_2 } {2n} \sum \frac{1}{2} w^2 $$
+
+$$ \frac{\partial L}{\partial w} = \frac{\lambda_2}{n}\sum w $$
+$$ g_t \leftarrow g_t + \frac{\lambda_2}{n}\sum w $$

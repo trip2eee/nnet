@@ -6,11 +6,8 @@ import numpy as np
 from nnet.optim.optimizer import Optimizer
 
 class SGD(Optimizer):
-    def __init__(self, parameters, lr, momentum=0, dampening=0) -> None:
-        super(SGD, self).__init__()
-        
-        self.parameters = parameters
-        self.learning_rate = lr
+    def __init__(self, parameters, lr, momentum=0, dampening=0, weight_decay_l1=0.0, weight_decay_l2=0.0):
+        super(SGD, self).__init__(parameters, lr, weight_decay_l1=weight_decay_l1, weight_decay_l2=weight_decay_l2)
         self.momentum = momentum
         self.dampening = dampening
     
@@ -36,7 +33,8 @@ class SGD(Optimizer):
             pm[key_b] = bt
 
             gt = bt
-            
+        
+        gt = self.regularize(pm, key, gt)
         pm[key] -= self.learning_rate * gt
         
 
