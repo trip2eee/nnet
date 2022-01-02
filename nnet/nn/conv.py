@@ -26,8 +26,7 @@ class Conv2d(Module):
 
         self.pm = {'w':weight, 'b':bias}        
         
-    def get_ext_regions(self, x, kh, kw, fill):
-        # TODO: To remove fill
+    def get_ext_regions(self, x, kh, kw):
         batches, xh, xw, xc = x.shape
 
         eh = xh + kh - 1
@@ -37,7 +36,7 @@ class Conv2d(Module):
         bw = (kw-1) // 2
 
         # padded input.
-        x_pad = np.zeros((batches, eh, ew, xc), dtype = np.float32) + fill
+        x_pad = np.zeros((batches, eh, ew, xc), dtype = np.float32)
         x_pad[:, bh:bh+xh, bw:bw+xw, :] = x
 
         regs = np.zeros((xh, xw, batches*kh*kw*xc), dtype = np.float32)
@@ -51,7 +50,7 @@ class Conv2d(Module):
     def get_ext_regions_for_conv(self, x, kh, kw):
         batches, xh, xw, xc = x.shape
 
-        regs = self.get_ext_regions(x, kh, kw, 0)
+        regs = self.get_ext_regions(x, kh, kw)
 
         # (batch, height, width, kh, kw, xc)
         regs = regs.transpose([2, 0, 1, 3, 4, 5])
@@ -106,7 +105,6 @@ class Conv2d(Module):
         y = y + self.pm['b']
 
         self.x = x
-        self.y = y
         self.x_flat = x_flat
         self.k_flat = k_flat
 
@@ -114,7 +112,6 @@ class Conv2d(Module):
 
     def backward(self, G_y, optim: Optimizer):
         x = self.x
-        y = self.y
         x_flat = self.x_flat
         k_flat = self.k_flat
 

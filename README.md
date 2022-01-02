@@ -60,19 +60,23 @@ import numpy as np
 from mnist_dataset import MNISTDataset
 
 NUM_CLASSES = 10
-class ModelMNIST(nnet.Model):
+class ModelMNIST(nnet.Module):
     def __init__(self):
         super(ModelMNIST, self).__init__()
 
-        self.layers = [
+        self.modules = [
             nn.Conv2d(in_channels=1, out_channels=4, kernel_size=(3,3)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2,2)),
+            nn.BatchNorm2d(num_features=4),
             nn.Conv2d(in_channels=4, out_channels=8, kernel_size=(3,3)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2,2)),
+            nn.BatchNorm2d(num_features=8),
             nn.Flatten(),
-            nn.Linear(in_features=7*7*8, out_features=NUM_CLASSES),
+            nn.Linear(in_features=7*7*8, out_features=7*7*4),
+            nn.ReLU(),
+            nn.Linear(in_features=7*7*4, out_features=NUM_CLASSES),
         ]
 
 def accuracy(output, target):
@@ -82,7 +86,9 @@ def accuracy(output, target):
 
     return np.mean(correct)
     
-if __name__ == "__main__":
+if __name__ == "__main__":    
+    np.random.seed(123)
+
     train_set = MNISTDataset('mnist/train-images.idx3-ubyte', 'mnist/train-labels.idx1-ubyte')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
 
@@ -91,8 +97,9 @@ if __name__ == "__main__":
 
     model = ModelMNIST()
     celoss = nnet.loss.CELoss()
-    optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
+    optim = nnet.optim.Adam(model.parameters(), lr=0.001)
 
+    model.train()
     for epoch in range(10):
         losses = []
         accs = []
@@ -107,29 +114,30 @@ if __name__ == "__main__":
             
         print('Epoch {}: loss={:0.3f}, accuracy={:0.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
 
+    model.eval()
     accs = []
     for idx_batch, (x, y) in enumerate(test_data):
         output = model(x)
         acc = accuracy(output, y)
         accs.append(acc)
-            
+
     print('Test accuracy={:0.3f}'.format(np.mean(accs)))
 ```
 
 ### Training result
 The result of training for 10 epochs.
 ```
-Epoch 1: loss=1.715, accuracy=0.519
-Epoch 2: loss=0.656, accuracy=0.810
-Epoch 3: loss=0.506, accuracy=0.848
-Epoch 4: loss=0.452, accuracy=0.864
-Epoch 5: loss=0.423, accuracy=0.874
-Epoch 6: loss=0.403, accuracy=0.880
-Epoch 7: loss=0.388, accuracy=0.885
-Epoch 8: loss=0.377, accuracy=0.888
-Epoch 9: loss=0.368, accuracy=0.892
-Epoch 10: loss=0.361, accuracy=0.895
-Test accuracy=0.897
+Epoch 1: loss=0.341, accuracy=0.898
+Epoch 2: loss=0.119, accuracy=0.963
+Epoch 3: loss=0.087, accuracy=0.973
+Epoch 4: loss=0.071, accuracy=0.978
+Epoch 5: loss=0.062, accuracy=0.981
+Epoch 6: loss=0.052, accuracy=0.984
+Epoch 7: loss=0.047, accuracy=0.985
+Epoch 8: loss=0.042, accuracy=0.987
+Epoch 9: loss=0.037, accuracy=0.988
+Epoch 10: loss=0.034, accuracy=0.989
+Test accuracy=0.985
 ```
 
 ## References

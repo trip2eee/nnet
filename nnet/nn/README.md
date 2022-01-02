@@ -50,6 +50,14 @@ $$ \frac{\partial{{y_{ij}}}}{\partial{b_{j}}} = 1 $$
 
 $$ \frac{\partial{L}}{\partial{b_j}} = \frac{\partial{L}}{\partial{y_{ij}}} \frac{\partial{{y_{ij}}}}{\partial{b_j}} = \sum_i g_{i,j} $$
 
+Since $ y_{ij} = \sum_k x_{ik} w_{kj} $,  the derivative of loss with respect to input $x$ is as follows.
+
+$$ \frac{\partial{L}}{\partial{x_{ik}}} = \frac{\partial{L}}{\partial{y_{ij}}} \frac{\partial{{y_{ij}}}}{\partial{x_{ik}}} = g_{i,j} \frac{\partial{{y_{ij}}}}{\partial{x_{ik}}} = g_{i,j}w_{k,j} $$
+
+The equation can be represented as matrix multiplication.
+
+$$ \frac{\partial{L}}{\partial{x}} = G W^T $$
+
 ## Conv2d
 
 ### Forward propagation
@@ -86,6 +94,31 @@ Therefore the gradient of loss with respect to bias is summation of gradient ove
 
 $$ \frac{\partial{L}}{\partial{b_m}} = \sum_n \sum_r \sum_c g_{n,r,c,m} $$
 
+
+
+## BatchNorm2d
+### Forward propagation
+
+
+While training, moving average and variance of input $x$ is computed.
+$$ \hat\mu_{x,t+1} \leftarrow \hat\mu_{x,t} + \alpha \left( \mu_{x, t+1} - \hat\mu_{x,t} \right) $$
+
+$$ \hat\sigma^2_{x,t+1} \leftarrow \hat\sigma^2_{x,t} + \alpha \left( \sigma^2_{x, t+1} - \hat\sigma^2_{x,t} \right) $$
+
+Normalize image over channel.
+$$ y = \gamma \frac{x - \mu_x}{\sqrt{\sigma^2_x + \epsilon}} + \beta $$
+
+
+### Backward propagation
+$$ \frac{\partial y}{\partial \gamma} = \hat x $$
+
+where 
+$$ \hat x = \frac{x-\mu_x}{\sqrt{\sigma^2_x + \epsilon}} $$
+
+
+$$ \frac{\partial y}{\partial \beta} = 1 $$
+
+$$ \frac{\partial y}{\partial x} = \frac{1}{\sqrt{\sigma^2_x + \epsilon}} $$
 
 
 

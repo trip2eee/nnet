@@ -17,7 +17,6 @@ class Linear(Module):
     def forward(self, x):
         y = np.matmul(x, self.pm['w']) + self.pm['b']        
         self.x = x
-        self.y = y
 
         return y
 

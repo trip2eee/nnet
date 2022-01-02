@@ -4,19 +4,23 @@ import numpy as np
 from mnist_dataset import MNISTDataset
 
 NUM_CLASSES = 10
-class ModelMNIST(nnet.Model):
+class ModelMNIST(nnet.Module):
     def __init__(self):
         super(ModelMNIST, self).__init__()
 
-        self.layers = [
+        self.modules = [
             nn.Conv2d(in_channels=1, out_channels=4, kernel_size=(3,3)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2,2)),
+            nn.BatchNorm2d(num_features=4),
             nn.Conv2d(in_channels=4, out_channels=8, kernel_size=(3,3)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2,2)),
+            nn.BatchNorm2d(num_features=8),
             nn.Flatten(),
-            nn.Linear(in_features=7*7*8, out_features=NUM_CLASSES),
+            nn.Linear(in_features=7*7*8, out_features=7*7*4),
+            nn.ReLU(),
+            nn.Linear(in_features=7*7*4, out_features=NUM_CLASSES),
         ]
 
 def accuracy(output, target):
@@ -26,7 +30,9 @@ def accuracy(output, target):
 
     return np.mean(correct)
     
-if __name__ == "__main__":
+if __name__ == "__main__":    
+    np.random.seed(123)
+
     train_set = MNISTDataset('mnist/train-images.idx3-ubyte', 'mnist/train-labels.idx1-ubyte')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
 
@@ -35,8 +41,9 @@ if __name__ == "__main__":
 
     model = ModelMNIST()
     celoss = nnet.loss.CELoss()
-    optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
+    optim = nnet.optim.Adam(model.parameters(), lr=0.001)
 
+    model.train()
     for epoch in range(10):
         losses = []
         accs = []
@@ -51,12 +58,11 @@ if __name__ == "__main__":
             
         print('Epoch {}: loss={:0.3f}, accuracy={:0.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
 
+    model.eval()
     accs = []
     for idx_batch, (x, y) in enumerate(test_data):
         output = model(x)
         acc = accuracy(output, y)
         accs.append(acc)
-            
+
     print('Test accuracy={:0.3f}'.format(np.mean(accs)))
-
-
