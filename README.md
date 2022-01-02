@@ -16,31 +16,23 @@ mnist_dataset.py
 
 ```python
 import numpy as np
-import os
 from nnet.dataset import Dataset
 import nnet.nn.math
 
 NUM_CLASSES = 10
-class MNISTDataset(Dataset):    
-    def __init__(self, path):
+class MNISTDataset(Dataset):
+    def __init__(self, image_path, label_path):
         super(MNISTDataset, self).__init__()
-        images = np.fromfile(os.path.join(path, 'train-images.idx3-ubyte'), dtype=np.uint8)        
-        magic_number = self.byte2int(images[0:4])
-        assert(magic_number == 2051)
-        num_samples = self.byte2int(images[4:8])
-        assert(num_samples == 60000)
-
-        labels = np.fromfile(os.path.join(path, 'train-labels.idx1-ubyte'), dtype=np.uint8)
-        magic_number = self.byte2int(labels[0:4])
-        assert(magic_number == 2049)
-        num_samples = self.byte2int(labels[4:8])
-        assert(num_samples == 60000)
-
+        images = np.fromfile(image_path, dtype=np.uint8)        
+        labels = np.fromfile(label_path, dtype=np.uint8)
+        
+        # first 32-bit: magic number, second 32-bit: number of items
         rows = self.byte2int(images[8:12])
         cols = self.byte2int(images[12:16])
+        self.x = np.reshape(images[16:], (-1, rows, cols, 1)).astype(np.float32) / 255.0
 
-        self.x = np.reshape(images[16:], (num_samples, rows, cols, 1)).astype(np.float32) / 255.0        
-        self.y = nnet.nn.math.onehot(labels[8:], NUM_CLASSES)   # one hot encoding
+        # one hot encoding of label. first 32-bit: magic number, second 32-bit: number of items
+        self.y = nnet.nn.math.onehot(labels[8:], NUM_CLASSES)
     
     def byte2int(self, bytes):
         val = 0
@@ -91,9 +83,12 @@ def accuracy(output, target):
     return np.mean(correct)
     
 if __name__ == "__main__":
-    train_set = MNISTDataset('mnist')
+    train_set = MNISTDataset('mnist/train-images.idx3-ubyte', 'mnist/train-labels.idx1-ubyte')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
-    
+
+    test_set = MNISTDataset('mnist/t10k-images.idx3-ubyte', 'mnist/t10k-labels.idx1-ubyte')
+    test_data = nnet.DataLoader(test_set, batch_size=-1, shuffle=False)
+
     model = ModelMNIST()
     celoss = nnet.loss.CELoss()
     optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
@@ -110,22 +105,31 @@ if __name__ == "__main__":
             acc = accuracy(output, y)
             accs.append(acc)
             
-        print('Epoch {}: loss={:5.4f}, accuracy={:5.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
+        print('Epoch {}: loss={:0.3f}, accuracy={:0.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
+
+    accs = []
+    for idx_batch, (x, y) in enumerate(test_data):
+        output = model(x)
+        acc = accuracy(output, y)
+        accs.append(acc)
+            
+    print('Test accuracy={:0.3f}'.format(np.mean(accs)))
 ```
 
 ### Training result
 The result of training for 10 epochs.
 ```
-Epoch 1: loss=1.7154, accuracy=0.519
-Epoch 2: loss=0.6560, accuracy=0.810
-Epoch 3: loss=0.5058, accuracy=0.848
-Epoch 4: loss=0.4524, accuracy=0.864
-Epoch 5: loss=0.4226, accuracy=0.874
-Epoch 6: loss=0.4025, accuracy=0.880
-Epoch 7: loss=0.3885, accuracy=0.885
-Epoch 8: loss=0.3774, accuracy=0.888
-Epoch 9: loss=0.3681, accuracy=0.892
-Epoch 10: loss=0.3607, accuracy=0.895
+Epoch 1: loss=1.715, accuracy=0.519
+Epoch 2: loss=0.656, accuracy=0.810
+Epoch 3: loss=0.506, accuracy=0.848
+Epoch 4: loss=0.452, accuracy=0.864
+Epoch 5: loss=0.423, accuracy=0.874
+Epoch 6: loss=0.403, accuracy=0.880
+Epoch 7: loss=0.388, accuracy=0.885
+Epoch 8: loss=0.377, accuracy=0.888
+Epoch 9: loss=0.368, accuracy=0.892
+Epoch 10: loss=0.361, accuracy=0.895
+Test accuracy=0.897
 ```
 
 ## References

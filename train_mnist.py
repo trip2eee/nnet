@@ -27,9 +27,12 @@ def accuracy(output, target):
     return np.mean(correct)
     
 if __name__ == "__main__":
-    train_set = MNISTDataset('mnist')
+    train_set = MNISTDataset('mnist/train-images.idx3-ubyte', 'mnist/train-labels.idx1-ubyte')
     train_data = nnet.DataLoader(train_set, batch_size=100, shuffle=True)
-    
+
+    test_set = MNISTDataset('mnist/t10k-images.idx3-ubyte', 'mnist/t10k-labels.idx1-ubyte')
+    test_data = nnet.DataLoader(test_set, batch_size=-1, shuffle=False)
+
     model = ModelMNIST()
     celoss = nnet.loss.CELoss()
     optim = nnet.optim.Adam(model.parameters(), lr=0.0001)
@@ -46,6 +49,14 @@ if __name__ == "__main__":
             acc = accuracy(output, y)
             accs.append(acc)
             
-        print('Epoch {}: loss={:5.4f}, accuracy={:5.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
+        print('Epoch {}: loss={:0.3f}, accuracy={:0.3f}'.format(epoch+1, np.mean(losses), np.mean(accs)))
+
+    accs = []
+    for idx_batch, (x, y) in enumerate(test_data):
+        output = model(x)
+        acc = accuracy(output, y)
+        accs.append(acc)
+            
+    print('Test accuracy={:0.3f}'.format(np.mean(accs)))
 
 
