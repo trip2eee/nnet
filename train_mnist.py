@@ -20,6 +20,7 @@ class ModelMNIST(nnet.Module):
             nn.Flatten(),
             nn.Linear(in_features=7*7*8, out_features=7*7*4),
             nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(in_features=7*7*4, out_features=NUM_CLASSES),
         ]
 

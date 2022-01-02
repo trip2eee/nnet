@@ -76,6 +76,7 @@ class ModelMNIST(nnet.Module):
             nn.Flatten(),
             nn.Linear(in_features=7*7*8, out_features=7*7*4),
             nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(in_features=7*7*4, out_features=NUM_CLASSES),
         ]
 
@@ -127,17 +128,17 @@ if __name__ == "__main__":
 ### Training result
 The result of training for 10 epochs.
 ```
-Epoch 1: loss=0.341, accuracy=0.898
-Epoch 2: loss=0.119, accuracy=0.963
-Epoch 3: loss=0.087, accuracy=0.973
-Epoch 4: loss=0.071, accuracy=0.978
-Epoch 5: loss=0.062, accuracy=0.981
-Epoch 6: loss=0.052, accuracy=0.984
-Epoch 7: loss=0.047, accuracy=0.985
-Epoch 8: loss=0.042, accuracy=0.987
-Epoch 9: loss=0.037, accuracy=0.988
-Epoch 10: loss=0.034, accuracy=0.989
-Test accuracy=0.985
+Epoch 1: loss=0.446, accuracy=0.865
+Epoch 2: loss=0.177, accuracy=0.947
+Epoch 3: loss=0.131, accuracy=0.960
+Epoch 4: loss=0.108, accuracy=0.967
+Epoch 5: loss=0.094, accuracy=0.971
+Epoch 6: loss=0.083, accuracy=0.974
+Epoch 7: loss=0.077, accuracy=0.976
+Epoch 8: loss=0.073, accuracy=0.977
+Epoch 9: loss=0.068, accuracy=0.979
+Epoch 10: loss=0.064, accuracy=0.980
+Test accuracy=0.988
 ```
 
 ## References

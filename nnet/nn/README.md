@@ -100,7 +100,7 @@ $$ \frac{\partial{L}}{\partial{b_m}} = \sum_n \sum_r \sum_c g_{n,r,c,m} $$
 ### Forward propagation
 
 
-While training, moving average and variance of input $x$ is computed.
+During training, moving average and variance of input $x$ is computed.
 $$ \hat\mu_{x,t+1} \leftarrow \hat\mu_{x,t} + \alpha \left( \mu_{x, t+1} - \hat\mu_{x,t} \right) $$
 
 $$ \hat\sigma^2_{x,t+1} \leftarrow \hat\sigma^2_{x,t} + \alpha \left( \sigma^2_{x, t+1} - \hat\sigma^2_{x,t} \right) $$
@@ -121,4 +121,14 @@ $$ \frac{\partial y}{\partial \beta} = 1 $$
 $$ \frac{\partial y}{\partial x} = \frac{1}{\sqrt{\sigma^2_x + \epsilon}} $$
 
 
+## Dropout
+### Forward propagation
+During randomly generate mask $m$ with zeros with probability p. Then the output is computed as follows.
 
+$$ y = m\frac{x}{1 - p} $$
+
+### Backward propagation
+
+$$ y = m\frac{x}{1 - p} $$
+$$ \frac{\partial y}{\partial x} = \frac{m}{1-p} $$
+$$ G_x = \frac{m}{1-p}G_y $$
